@@ -1,0 +1,5 @@
+ajout du fichier putchar.c (tp:1 /page:1)
+--Cette ligne, et les suivantes ci-dessous, seront ignorées--
+
+M    test/halt.c
+A    test/putchar.c
