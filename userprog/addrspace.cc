@@ -21,6 +21,8 @@
 #include "noff.h"
 #include "syscall.h"
 #include "new"
+#include "synch.h"
+
 
 //----------------------------------------------------------------------
 // SwapHeader
@@ -65,6 +67,35 @@ List AddrSpaceList;
 //
 //      "executable" is the file containing the object code to load into memory
 //----------------------------------------------------------------------
+#ifdef CHANGED
+static void ReadAtVirtual(OpenFile *executable, int virtualaddr,
+int numBytes, int position, TranslationEntry *pageTable,
+unsigned numPages)
+{
+    char *tmp = new char[numBytes];
+    executable->ReadAt(tmp,numBytes,position);
+
+    //temporarily ynstall pageTable
+
+    TranslationEntry *old_pageTable = machine->currentPageTable;
+    unsigned old_size = machine->currentPageTableSize;
+
+    machine->currentPageTable = pageTable;
+    machine->currentPageTableSize = numPages;
+
+    //copy tmp to addrspace using writeMem
+    for(int i=0;i<numBytes;i++)
+        machine->WriteMem(virtualaddr + i,1,tmp[i]);
+
+    //restore original pagTable 
+
+    machine->currentPageTable = old_pageTable;
+    machine->currentPageTableSize = old_size;
+
+    delete []tmp;
+}
+#endif
+
 
 AddrSpace::AddrSpace (OpenFile * executable)
 {
@@ -87,7 +118,7 @@ AddrSpace::AddrSpace (OpenFile * executable)
     // to run anything too big --
     // at least until we have
     // virtual memory
-    if (numPages > NumPhysPages)
+    if (numPages > NumPhysPages)  // if numPages > Ram
 	    throw std::bad_alloc();
 
     DEBUG ('a', "Initializing address space, num pages %d, total size 0x%x\n",
@@ -96,7 +127,7 @@ AddrSpace::AddrSpace (OpenFile * executable)
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++)
       {
-	  pageTable[i].physicalPage = i;	// for now, phys page # = virtual page #
+	  pageTable[i].physicalPage = i+1;	// for now, phys page # = virtual page #
 	  pageTable[i].valid = TRUE;
 	  pageTable[i].use = FALSE;
 	  pageTable[i].dirty = FALSE;
@@ -110,17 +141,29 @@ AddrSpace::AddrSpace (OpenFile * executable)
       {
 	  DEBUG ('a', "Initializing code segment, at 0x%x, size 0x%x\n",
 		 noffH.code.virtualAddr, noffH.code.size);
+    /*
 	  executable->ReadAt (&(machine->mainMemory[noffH.code.virtualAddr]),
 			      noffH.code.size, noffH.code.inFileAddr);
+    */
+   #ifdef CHANGED
+       ReadAtVirtual(executable,noffH.code.virtualAddr,
+        noffH.code.size, noffH.code.inFileAddr,pageTable,numPages);          
       }
+    #endif  
     if (noffH.initData.size > 0)
       {
 	  DEBUG ('a', "Initializing data segment, at 0x%x, size 0x%x\n",
 		 noffH.initData.virtualAddr, noffH.initData.size);
+         /*
 	  executable->ReadAt (&
 			      (machine->mainMemory
 			       [noffH.initData.virtualAddr]),
 			      noffH.initData.size, noffH.initData.inFileAddr);
+        */
+       #ifdef CHANGED
+       ReadAtVirtual(executable,noffH.initData.virtualAddr,
+        noffH.initData.size, noffH.initData.inFileAddr,pageTable,numPages);
+        #endif
       }
 
     DEBUG ('a', "Area for stacks at 0x%x, size 0x%x\n",
@@ -289,14 +332,46 @@ AddrSpace::SaveState ()
 void
 AddrSpace::RestoreState ()
 {
-    machine->currentPageTable = pageTable;
+    machine->currentPageTable = pageTable; //reinstal la table de page dans la MMU
     machine->currentPageTableSize = numPages;
 }
 #ifdef CHANGED
+int nbThread=1;
+
+int maxSlot =(UserStacksAreaSize/256) -1 ;
+
+BitMap*bitmap = new BitMap (maxSlot);
+
+Semaphore *wait_thread = new Semaphore("wait_thread", maxSlot);
+
+Lock *Lock_nbThread= new Lock("Lock_nbThread");
 
 int 
 AddrSpace::AllocateUserStack ()
 {
-    return numPages*PageSize-256;
+    
+    wait_thread->P(); 
+
+    Lock_nbThread->Acquire ();
+
+    int pos=bitmap->Find();
+     
+    if(pos!=-1){
+       
+        currentThread->numSlot=pos;
+
+        int position = (pos+1)*256;
+        DEBUG ('s', "from allocate user stack =====> valeur de pos=%d  \n",pos+1);
+        if(position < UserStacksAreaSize ) {
+            int ret = numPages*PageSize-position; 
+            nbThread++;
+            DEBUG ('s', "from allocate user stack  valeur de ret=%d  \n",ret);
+            Lock_nbThread->Release ();
+            return ret;
+        }
+    }
+    printf("nbThread > UserStacksAreaSize !\n"); //on doit jamiais arriver là 
+	ASSERT (FALSE);   
+    return 0;
 }
 #endif

@@ -18,8 +18,18 @@
 #include "translate.h"
 #include "noff.h"
 #include "list.h"
-
+#include "bitmap.h"
 #define UserStacksAreaSize		1024	// increase this as necessary!
+
+#ifdef CHANGED
+extern int nbThread;
+class BitMap;
+extern BitMap *bitmap;
+class Semaphore;
+extern Semaphore *wait_thread;
+class Lock;
+extern Lock *Lock_nbThread;
+#endif
 
 class AddrSpace:dontcopythis
 {
