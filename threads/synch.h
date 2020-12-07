@@ -45,7 +45,6 @@ class Semaphore:dontcopythis
     {
 	return name;
     }				// debugging assist
-
     void P ();			// these are the only operations on a semaphore
     void V ();			// they are both *atomic*
 
@@ -88,6 +87,8 @@ class Lock:dontcopythis
   private:
     const char *name;		// for debugging
     // plus some other stuff you'll need to define
+    Thread *threadOwner;
+    List *queue;
 };
 
 // The following class defines a "condition variable".  A condition

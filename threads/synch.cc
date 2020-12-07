@@ -109,25 +109,60 @@ Semaphore::V ()
 // the test case in the network assignment won't work!
 Lock::Lock (const char *debugName)
 {
-    (void) debugName;
-    /* TODO */
-    ASSERT(FALSE);
+    #ifdef CHANGED
+    name  = debugName;
+    queue = new List;
+    threadOwner = NULL;
+    #endif
+    
 }
 
 Lock::~Lock ()
 {
+    #ifdef CHANGED
+    delete queue;
+    queue = NULL;
+    threadOwner=NULL;
+    #endif
 }
 void
 Lock::Acquire ()
 {
-    /* TODO */
-    ASSERT(FALSE);
+    #ifdef CHANGED
+
+    IntStatus oldLevel = interrupt->SetLevel (IntOff);	// disable interrupts
+
+
+    while (threadOwner != NULL)
+      {				// lock not available
+	  queue->Append ((void *) currentThread);	// so go to sleep
+	  currentThread->Sleep ();
+      }
+    threadOwner = (Thread *) currentThread ;			// lock available, 
+    
+
+    (void) interrupt->SetLevel (oldLevel);	// re-enable interrupts
+
+
+    #endif
 }
 void
 Lock::Release ()
 {
-    /* TODO */
-    ASSERT(FALSE);
+    #ifdef CHANGED
+
+    Thread *thread;
+    IntStatus oldLevel = interrupt->SetLevel (IntOff);
+
+    ASSERT(threadOwner == currentThread);
+
+    thread = (Thread *) queue->Remove ();
+    if (thread != NULL)		// make thread ready
+	scheduler->ReadyToRun (thread);
+    threadOwner=NULL;
+    (void) interrupt->SetLevel (oldLevel);
+
+    #endif
 }
 
 Condition::Condition (const char *debugName)

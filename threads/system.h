@@ -21,9 +21,11 @@
 
 #ifdef CHANGED
 #ifdef USER_PROGRAM
+#include "pageprovider.h"
 #include "consoledriver.h"
 extern ConsoleDriver *consoledriver;
 extern const int MAX_STRING_SIZE ; 
+extern PageProvider *pageprovider;
 #endif
 #endif
 

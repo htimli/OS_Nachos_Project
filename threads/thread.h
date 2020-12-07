@@ -89,7 +89,9 @@ class Thread:dontcopythis
     // NOTE -- thread being deleted
     // must not be running when delete 
     // is called
-
+    #ifdef CHANGED  
+    int numSlot;
+    #endif
     // basic thread operations
 
     void Start (VoidFunctionPtr func, void *arg);	// Make thread run (*func)(arg)
