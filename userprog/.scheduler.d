@@ -6,5 +6,5 @@
  ../filesys/filesys.h ../filesys/openfile.h ../machine/translate.h \
  ../bin/noff.h ../threads/list.h ../userprog/bitmap.h \
  ../filesys/openfile.h ../threads/system.h ../machine/interrupt.h \
- ../machine/stats.h ../machine/timer.h ../userprog/consoledriver.h \
- ../machine/console.h
+ ../machine/stats.h ../machine/timer.h ../userprog/pageprovider.h \
+ ../threads/synch.h ../userprog/consoledriver.h ../machine/console.h

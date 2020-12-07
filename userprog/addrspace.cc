@@ -127,7 +127,14 @@ AddrSpace::AddrSpace (OpenFile * executable)
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++)
       {
-	  pageTable[i].physicalPage = i+1;	// for now, phys page # = virtual page #
+	  pageTable[i].physicalPage = pageprovider->GetEmptyPage();	// for now, phys page # = virtual page #
+      if((int)pageTable[i].physicalPage == -1 ){ //si mémoire pleine 
+          for(int j= i-1 ;j >= 0 ; j--){
+              pageprovider->ReleasePage(i);
+              pageTable[i].valid = FALSE;
+              throw std::bad_alloc();
+          }
+      }
 	  pageTable[i].valid = TRUE;
 	  pageTable[i].use = FALSE;
 	  pageTable[i].dirty = FALSE;
@@ -181,10 +188,15 @@ AddrSpace::AddrSpace (OpenFile * executable)
 
 AddrSpace::~AddrSpace ()
 {
-  delete [] pageTable;
-  pageTable = NULL;
+    #ifdef CHANGED  
+    for(int i; i <= NumPhysPages ; i++){
+        pageprovider->ReleasePage(i);
+    }
+    #endif
+    delete [] pageTable;
+    pageTable = NULL;
 
-  AddrSpaceList.Remove(this);
+    AddrSpaceList.Remove(this);
 }
 
 //----------------------------------------------------------------------
@@ -374,4 +386,5 @@ AddrSpace::AllocateUserStack ()
 	ASSERT (FALSE);   
     return 0;
 }
+
 #endif

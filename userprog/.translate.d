@@ -7,4 +7,5 @@
  ../filesys/openfile.h ../threads/system.h ../threads/thread.h \
  ../threads/list.h ../machine/machine.h ../threads/scheduler.h \
  ../machine/interrupt.h ../machine/stats.h ../machine/timer.h \
+ ../userprog/pageprovider.h ../threads/synch.h \
  ../userprog/consoledriver.h ../machine/console.h
