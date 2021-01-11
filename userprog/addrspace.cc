@@ -358,6 +358,8 @@ Semaphore *wait_thread = new Semaphore("wait_thread", maxSlot);
 
 Lock *Lock_nbThread= new Lock("Lock_nbThread");
 
+int nbProcess=0;
+
 int 
 AddrSpace::AllocateUserStack ()
 {

@@ -26,7 +26,8 @@
 #include "syscall.h"
 
 #ifdef CHANGED
-#include"userthread.h"
+#include "userthread.h"
+#include "userprog.h"
 #endif
 
 
@@ -132,10 +133,16 @@ ExceptionHandler (ExceptionType which)
 		    break;
 		  }
 		case SC_Exit:
-		  {
-			int code = machine->ReadRegister (4); 
-			printf("\nExit  : arg = %d \n",code);
-			interrupt->Halt ();
+		  { 
+			printf("\nExit  : arg = %d \n",machine->ReadRegister (4));
+			printf("\nnbProcess = %d \n",nbProcess);
+			nbProcess--;						
+			if(nbProcess==0)
+				interrupt->Halt ();
+			else {
+				free(currentThread->space);
+				currentThread->Finish(); 	
+			}	
 		    break; 
 		  }
 		#ifdef CHANGED
@@ -254,7 +261,27 @@ ExceptionHandler (ExceptionType which)
 			do_threadExit();
 			break;
 		}
-	
+		case SC_ForkExec:
+		{
+			DEBUG ('s', "ForkExec debug \n");
+
+			int a=0;
+			bool fin =false;
+			
+			char to[MAX_STRING_SIZE];
+			int ptr = machine->ReadRegister(4);
+			while(!fin){
+				
+				ptr=ptr+a;
+				a=copyStringFromMachine(ptr,to,MAX_STRING_SIZE,&fin);	
+				// on a pas gérer le cas ou la chaine est trop longue
+			}	
+			DEBUG ('s', "chaine copié = %s \n",to);
+
+			do_ForkExec(to);
+
+			break;
+		}
 		#endif
 		/****************************************essai**************************/
 		#ifdef CHANGED

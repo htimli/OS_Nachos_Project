@@ -16,7 +16,7 @@ PageProvider::GetEmptyPage(){
     int res =  bitmap->Find();
     //if -1 no bits are clear
     if(res != -1)
-        memset(&machine->mainMemory[res],0,PageSize);   
+        memset(&machine->mainMemory[res*PageSize],0,PageSize);   
     mutex->Release();
     return res ;        
 }

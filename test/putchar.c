@@ -14,8 +14,9 @@ void print (char c , int n )
 }
 
 int main()
-{
+{    
     print('b',4);
-    Halt();
+   // Halt();
+   return 0;
 }
 #endif

@@ -15,7 +15,7 @@
 #ifdef CHANGED
 #ifdef USER_PROGRAM
 ConsoleDriver *consoledriver;
-const  int MAX_STRING_SIZE = 3 ;
+const  int MAX_STRING_SIZE = 20 ;
 #endif
 #endif
 

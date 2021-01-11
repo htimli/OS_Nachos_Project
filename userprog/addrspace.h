@@ -29,6 +29,8 @@ class Semaphore;
 extern Semaphore *wait_thread;
 class Lock;
 extern Lock *Lock_nbThread;
+
+extern int nbProcess;
 #endif
 
 class AddrSpace:dontcopythis

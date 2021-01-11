@@ -7,4 +7,5 @@
  ../threads/list.h ../userprog/bitmap.h ../filesys/openfile.h \
  ../threads/scheduler.h ../machine/interrupt.h ../machine/stats.h \
  ../machine/timer.h ../userprog/pageprovider.h ../threads/synch.h \
- ../userprog/consoledriver.h ../machine/console.h syscall.h userthread.h
+ ../userprog/consoledriver.h ../machine/console.h syscall.h userthread.h \
+ userprog.h
